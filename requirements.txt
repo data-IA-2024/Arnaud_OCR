@@ -1,0 +1,55 @@
+#  Backend : Framework web pour l'API OCR et l'authentification
+Flask>=3.1.0  # Framework web léger et rapide pour créer des API
+Flask-JWT-Extended>=4.5.3  # Authentification avec JWT (JSON Web Tokens)
+Flask-Bcrypt>=1.0.1  # Hachage des mots de passe pour la sécurité
+Flask-CORS>=4.0.0  # Gestion du Cross-Origin Resource Sharing
+Flask-SQLAlchemy>=3.1.0  # ORM pour la gestion des bases de données avec Flask
+
+#  Serveur WSGI pour la mise en production
+gunicorn>=23.0.0  # Serveur WSGI pour déployer l'application Flask
+
+#  Documentation API (Swagger)
+flasgger>=0.9.5  # Génère une documentation Swagger automatique pour Flask
+
+#  OCR et traitement d'image
+opencv-python>=4.9.0  # Manipulation et prétraitement des images pour l'OCR
+pytesseract>=0.3.10  # Bibliothèque OCR basée sur Tesseract
+Pillow>=11.1.0  # Manipulation avancée des images (redimensionnement, conversions)
+
+#  Intelligence Artificielle (Clustering & Recommandation)
+scikit-learn>=1.6.1  # Algorithmes de clustering et de machine learning
+pandas>=2.2.3  # Manipulation et analyse des données OCR et client
+numpy>=2.2.3  # Calculs numériques et gestion des matrices
+scipy>=1.15.2  # Algorithmes d'optimisation et statistiques
+joblib>=1.4.2  # Sauvegarde et chargement des modèles ML
+torch>=2.6.0  # Deep learning et modèles de recommandation basés sur PyTorch
+
+#  Base de données : Stockage des facturations et monitoring
+SQLAlchemy>=2.0.38  # ORM (Object-Relational Mapping) pour SQL
+psycopg2>=2.9.10  # Connecteur PostgreSQL (si utilisé)
+pymongo>=4.6.0  # Connecteur MongoDB (si NoSQL utilisé)
+
+#  Gestion des erreurs, logs et monitoring
+tenacity>=9.0.0  # Gestion des erreurs et retry automatique
+rich>=13.9.4  # Affichage coloré des logs pour un meilleur debug
+loguru>=0.7.2  # Logging avancé
+
+#  Tests et qualité du code
+pytest>=8.3.4  # Framework de tests pour TDD
+pytest-cov>=5.0.0  # Couverture des tests
+flake8>=7.1.2  # Linter pour vérifier la qualité du code
+black>=25.1.0  # Formatteur automatique du code
+isort>=6.0.1  # Trie les imports pour un code plus propre
+tox>=4.11.0  # Tests multi-environnements
+
+#  CI/CD et Déploiement Docker
+docker>=7.0.0  # Client Docker pour le déploiement
+docker-compose>=1.29.2  # Gestion des conteneurs Docker
+pre-commit>=4.1.0  # Exécution automatique des tests et lints avant commit
+
+#  Requêtes HTTP et API externe
+requests>=2.32.3  # Gestion des requêtes HTTP
+fastapi>=0.115.8  # Si évolution vers un backend plus rapide que Flask
+
+#  Utilitaires
+python-dotenv>=1.0.1  # Chargement des variables d'environnement
