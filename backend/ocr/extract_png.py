@@ -14,6 +14,7 @@ def download_png(file_name, year):
     
     # Construire l'URL complète du blob
     blob_url = f"{BASE_URL}invoices-{year}/{file_name}{SAS_TOKEN}"
+    print(blob_url)
     
     # Définir le dossier où enregistrer le fichier
     save_dir = f"data/{year}/"
