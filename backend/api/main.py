@@ -1,5 +1,5 @@
-from getlist import list_png_files
-from extract_png import download_png
+from backend.ocr.getlist import list_png_files
+from backend.ocr.extract_png import download_png
 import os
 
 def main():
