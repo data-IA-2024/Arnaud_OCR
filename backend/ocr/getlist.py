@@ -13,7 +13,7 @@ SAS_TOKEN = "?" + os.getenv("CONTAINER_SAS")
 
 def list_png_files():
     png_files = []
-    
+
     for year in YEARS:
         folder_url = f"{BASE_URL}invoices-{year}{SAS_TOKEN}"
         try:
