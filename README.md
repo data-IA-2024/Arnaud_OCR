@@ -17,10 +17,10 @@ Ce projet vise à développer une application OCR (Reconnaissance Optique de Car
 ## Architecture de l'Application
 
 ### Technologies Utilisées
-- **Backend** : Flask / FastAPI (au choix)
-- **Frontend** : React / Vue.js / Angular (au choix)
-- **Base de données** : PostgreSQL / MySQL / MongoDB (au choix)
-- **OCR** : Tesseract OCR, Google Cloud Vision API, AWS Textract, Azure OCR
+- **Backend** : FastAPI
+- **Frontend** : Jinja2 + JS
+- **Base de données** : PostgreSQL
+- **OCR** : easyOCR
 - **CI/CD** : GitHub Actions, GitLab CI/CD, Docker
 - **Authentification** : JWT, OAuth2
 - **Tests** : PyTest, Unittest

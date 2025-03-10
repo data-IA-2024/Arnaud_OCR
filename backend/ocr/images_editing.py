@@ -43,10 +43,27 @@ if not results:
     print("❌ Aucun texte détecté par EasyOCR.")
     exit()
 
-# Afficher le texte extrait
-print("\n📄 Texte extrait par OCR :")
-for (bbox, text, confidence) in results:
-    print(f"📝 Texte détecté : '{text}', Confiance : {confidence:.2f}, Position : {bbox}")
+# Calculer la moyenne de l'indice de performance (confiance)
+total_confidence = sum(confidence for (_, _, confidence) in results)
+average_confidence = total_confidence / len(results) if results else 0
+
+# Définir le chemin du fichier texte pour sauvegarder le texte extrait
+text_output_path = os.path.join(base_dir, "data", "2018", "FAC_2018_0001-654_extracted.txt")
+
+# Ouvrir le fichier en mode écriture et sauvegarder le texte extrait
+with open(text_output_path, "w", encoding="utf-8") as f:
+    f.write("📄 Texte extrait par OCR :\n\n")
+    
+    # Boucle qui ajoute chaque texte extrait dans le fichier
+    for (bbox, text, confidence) in results:
+        f.write(f"📝 Texte détecté : '{text}'\n")
+        f.write(f"🔹 Confiance : {confidence:.2f}\n")
+
+    # Ajouter la moyenne globale de l'indice de performance
+    f.write(f"\n📊 Moyenne globale de confiance OCR : {average_confidence:.2f}\n")
+
+print(f"\n✅ Texte OCR sauvegardé dans : {text_output_path}")
+print(f"📊 Moyenne globale de confiance OCR : {average_confidence:.2f}")
 
 # Dessiner les boîtes sur l'image pour visualisation
 image_annotated = image_processed.convert("RGB")  
