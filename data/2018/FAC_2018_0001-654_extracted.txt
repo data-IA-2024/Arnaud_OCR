@@ -1,52 +1,17 @@
-📄 Texte extrait par OCR :
+📄 Texte extrait par Tesseract OCR :
 
-📝 Texte détecté : 'INVOICE FAC/2018/0001'
-🔹 Confiance : 0.72
-📝 Texte détecté : 'Issue date 2018-10-13'
-🔹 Confiance : 0.91
-📝 Texte détecté : 'Bill to Carol Potter'
-🔹 Confiance : 0.93
-📝 Texte détecté : 'Email ashley38@example org'
-🔹 Confiance : 0.69
-📝 Texte détecté : 'Address 405 Adrian Crest Suite095'
-🔹 Confiance : 0.68
-📝 Texte détecté : 'Jamesstad; MN 36094'
-🔹 Confiance : 0.73
-📝 Texte détecté : 'Edge so crime share.'
-🔹 Confiance : 0.79
-📝 Texte détecté : '12 .18'
-🔹 Confiance : 0.77
-📝 Texte détecté : 'Euro'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'Thank do article especially.'
-🔹 Confiance : 0.56
-📝 Texte détecté : '67'
-🔹 Confiance : 1.00
-📝 Texte détecté : '86'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'Euro'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'Include dinner main friend.'
-🔹 Confiance : 0.57
-📝 Texte détecté : '287'
-🔹 Confiance : 1.00
-📝 Texte détecté : '99'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'Euro'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'Capital hear morning people:'
-🔹 Confiance : 0.91
-📝 Texte détecté : '55 . 43'
-🔹 Confiance : 0.92
-📝 Texte détecté : 'Euro'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'TOTAL'
-🔹 Confiance : 1.00
-📝 Texte détecté : '1146 .84'
-🔹 Confiance : 0.74
-📝 Texte détecté : 'Euro'
-🔹 Confiance : 1.00
-📝 Texte détecté : 'Btilllling'
-🔹 Confiance : 0.31
+INVOICE FAC/2018/0001
+Issue date 2018-10-13
+Bill to Carol Potter
 
-📊 Moyenne globale de confiance OCR : 0.84
+Email ashley38@example. org
+
+Address 405 Adrian Crest Suite 095
+Jamesstad, MN 36094
+
+Edge so crime share. 4 x 12.18 Euro
+Thank do article especially. 1 x 67.86 Euro
+Include dinner main friend. 3 x 287.99 Euro
+Capital hear morning people. 3 x 55.43 Euro
+
+TOTAL 1146.84 Euro
