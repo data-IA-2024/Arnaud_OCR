@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Liste des dossiers à scanner (manuellement)
-YEARS = [str(year) for year in range(2018, 2025)]
+YEARS = [str(year) for year in range(2018, 2019)]
 BASE_URL = "https://projetocrstorageacc.blob.core.windows.net/"
 SAS_TOKEN = "?" + os.getenv("CONTAINER_SAS")
 
