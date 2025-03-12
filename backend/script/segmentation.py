@@ -33,4 +33,5 @@ def extract_blocks(gray):
         x, y, w, h = coord
         cv2.rectangle(gray, (int(x), int(y)), (int(x+w), int(y+h)), (0, 255, 0), stroke_width)
         blocks[block_name]=gray[int(y):int(y+h), int(x):int(x+w)]
-    return blocks  
+    return blocks
+print(extract_blocks)

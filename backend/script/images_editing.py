@@ -1,7 +1,7 @@
 import os
 import pytesseract
 import cv2
-import numpy as np
+import numpy as np  
 from PIL import Image, ImageEnhance, ImageFilter, ImageDraw
 
 # 🔹 Définir le chemin vers Tesseract (Windows uniquement)
