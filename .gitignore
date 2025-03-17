@@ -30,7 +30,7 @@ wheels/
 .idea/
 
 # Environnements virtuels (protection des dépendances)
-.env  # ⬅ Protection de tes credentials !
+.env 
 .venv
 venv/
 ENV/
