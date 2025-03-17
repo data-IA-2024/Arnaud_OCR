@@ -20,11 +20,11 @@ Ce projet vise à développer une application OCR (Reconnaissance Optique de Car
 - **Backend** : FastAPI
 - **Frontend** : Jinja2 + JS
 - **Base de données** : PostgreSQL
-- **OCR** : easyOCR
+- **OCR** : Tesseract
 - **CI/CD** : GitHub Actions, GitLab CI/CD, Docker
 - **Authentification** : JWT, OAuth2
 - **Tests** : PyTest, Unittest
-- **Conteneurisation & Déploiement** : Docker, Kubernetes
+- **Conteneurisation & Déploiement** : Docker
 - **Monitoring & Logs** : Prometheus, ELK Stack, Grafana
 
 ### Schéma Fonctionnel
@@ -68,6 +68,7 @@ OCR_SERVICE=your_ocr_service
 OCR_API_KEY=your_api_key
 DATABASE_URL=your_database_url
 SECRET_KEY=your_secret_key
+POSTGRES_URI=your_secret_key
 ```
 
 ### Lancer l'Application
