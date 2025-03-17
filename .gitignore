@@ -42,7 +42,7 @@ data/external/*
 data/raw/.gitkeep
 data/processed/.gitkeep
 data/external/.gitkeep
-data/
+data/*
 
 # OCR Outputs (images & results)
 *.png
