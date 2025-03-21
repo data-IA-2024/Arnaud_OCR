@@ -3,8 +3,8 @@ import cv2
 def rgb_to_gray(image):# 🔹 Convertir en niveaux de gris
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-def extract_blocks(gray):
-    height, width = gray.shape
+def extract_blocks(image):
+    height, width = image.shape[:2]
     stroke_width=3
     x1= y1= stroke_width
     w1=0.4*width-stroke_width
@@ -31,7 +31,9 @@ def extract_blocks(gray):
     for block_name, coord in rects.items():
         
         x, y, w, h = coord
-        cv2.rectangle(gray, (int(x), int(y)), (int(x+w), int(y+h)), (0, 255, 0), stroke_width)
-        blocks[block_name]=gray[int(y):int(y+h), int(x):int(x+w)]
+        #cv2.rectangle(image, (int(x), int(y)), (int(x+w), int(y+h)), (0, 255, 0), stroke_width)
+        blocks[block_name]=image[int(y):int(y+h), int(x):int(x+w)]
     return blocks
-print(extract_blocks)
+
+if __name__ == '__main__':
+    print(extract_blocks)

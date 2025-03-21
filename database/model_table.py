@@ -1,46 +1,32 @@
-from sqlalchemy import MetaData, Column, Integer, String, DateTime, Date, ForeignKey, Numeric  
-# 📌 `MetaData` : Stocke la structure de la base (tables, colonnes…)
-# 📌 `ForeignKey` : Définit une relation entre deux tables (clé étrangère)  
-# 📌 `Numeric` : Type pour stocker des nombres avec des décimales (ex: prix)  
+from sqlalchemy import Column, String, Numeric, ForeignKey, Date, MetaData
+from sqlalchemy.orm import declarative_base, relationship
+import os
 
-from sqlalchemy.orm import declarative_base, relationship  
-# 📌 `declarative_base` : Classe Python qui sera transformée en SQL
-# 📌 `relationship` : Permet de créer des relations entre les tables dans SQLAlchemy ORM  
-
-from sqlalchemy import create_engine
-import os 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-Base = declarative_base(metadata=MetaData(schema="arnaud"))
+Base = declarative_base(metadata=MetaData(schema=os.environ.get('DB_SCHM')))
 
 class Customer(Base):
     __tablename__ = 'customers'
-    name = Column(String, nullable=False) 
+    
     email = Column(String, primary_key=True, nullable=False)
+    name = Column(String, nullable=False) 
+    gender = Column(String, nullable=True)
     adress = Column(String, nullable=True)
     birth = Column(Date, nullable=True)
 
     invoices = relationship("Invoice", back_populates="customer")
 
     def __repr__(self):
-        return f"CUST {self.email}"
+        return f"Customer {self.email} | Gender: {self.gender} | Birth: {self.birth}"
 
 class Invoice(Base):
     __tablename__ = 'invoices'
-    invoice_number = Column(String, primary_key=True, nullable=False)  # Ajout de nullable=False
-    total = Column(Numeric(8,2))
-    customer_email = Column(String, ForeignKey('customers.email'), nullable=True)
     
+    invoice_number = Column(String, primary_key=True, nullable=False)
+    total = Column(Numeric(8,2))
+    customer_email = Column(String, ForeignKey('customers.email'), nullable=False)
+    creation_date = Column(Date, nullable=False)
+
     customer = relationship("Customer", back_populates="invoices")
 
     def __repr__(self):
-        return f"INVOICE n°{self.no} (client: {self.cust_email})"
-
-    
-if __name__ == "__main__":
-    #test_connection()
-    engine = create_engine(os.getenv('POSTGRES_URI'))
-    
-    Base.metadata.create_all(bind=engine, checkfirst=True)  # Crée les tables si elles n'existent pas déjà
+        return f"Invoice {self.invoice_number} | Customer: {self.customer_email} | Date: {self.creation_date}"
