@@ -15,29 +15,33 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    dropZone.addEventListener("click", function() {
-        fileInput.click();
-    });
+    if (dropZone) {
+        dropZone.addEventListener("click", function() {
+            fileInput.click();
+        });
+
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            handleFile(e.dataTransfer.files[0]);
+        });
+    } else {
+        console.error("Element #drop-zone non trouvé");
+    }
 
     fileInput.addEventListener("change", function() {
         if (this.files && this.files[0]) {
             handleFile(this.files[0]);
         }
-    });
-
-    dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.classList.add("dragover");
-    });
-
-    dropZone.addEventListener("dragleave", () => {
-        dropZone.classList.remove("dragover");
-    });
-
-    dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.classList.remove("dragover");
-        handleFile(e.dataTransfer.files[0]);
     });
 
     function handleFile(file) {
@@ -54,48 +58,38 @@ document.addEventListener("DOMContentLoaded", function() {
     function displayPreview(file) {
         console.log("Fichier sélectionné :", file.name);
         
-        // Créer un conteneur flex pour l'image et le bouton
         const container = document.createElement("div");
         container.className = "d-flex align-items-start";
         
-        // Créer le conteneur de l'image
         const imageContainer = document.createElement("div");
-        imageContainer.className = "position-relative";
+        imageContainer.className = "position-relative me-3";
         imageContainer.style.width = "300px";
         imageContainer.style.height = "300px";
         
         const img = document.createElement("img");
-        img.style.width = "163%";
-        img.style.height = "214%";
-        img.style.objectFit = "cover";
-
-        
+        img.style.width = "300%";
+        img.style.height = "300%";
+        img.style.objectFit = "contain";
+    
         const reader = new FileReader();
         reader.onload = function(e) {
             img.src = e.target.result;
             imageContainer.appendChild(img);
-            
-            // Créer le bouton OCR
-            const ocrButton = document.createElement("button");
-            ocrButton.textContent = "OCR";
-            ocrButton.className = "btn btn-primary"; // ms-3 ajoute une marge à gauche
-            ocrButton.onclick = function() {
-                console.log("Lancement du processus OCR");
+    ;
                 // Ajoutez ici la logique pour lancer le processus OCR
             };
             
-            // Ajouter l'image et le bouton OCR au conteneur flex
             container.appendChild(imageContainer);
+            container.appendChild(ocrButton);
             
-            
-            // Remplacer le contenu de la zone de dépôt
-            const dropZone = document.getElementById("drop-zone");
-            dropZone.innerHTML = '';
-            dropZone.appendChild(container);
+            if (dropZone) {
+                dropZone.innerHTML = '';
+                dropZone.appendChild(container);
+            } else {
+                console.error("Element #drop-zone non trouvé lors de l'affichage de l'aperçu");
+            }
         };
         
         reader.readAsDataURL(file);
-    }
-    
     
 });
