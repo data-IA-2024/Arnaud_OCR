@@ -9,6 +9,9 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
+from backend.script.main import process_image
+from PIL import Image
+import io
 
 
 
@@ -54,6 +57,14 @@ async def upload_file(file: UploadFile):
         return {"message": f"Fichier {file.filename} uploadé avec succès."}
     except Exception as e:
         return {"error": str(e)}
+    
+@app.post("/OCR")
+async def OCR_page(file: UploadFile=File()):
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents))
+    image.save("temp/temp.png")
+    print(image)
+    return {'filename':file.filename, 'result' : process_image('temp/temp.png')}
 
 @app.get("/logout", response_class=HTMLResponse)
 async def logout_page(request: Request):

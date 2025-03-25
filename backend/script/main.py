@@ -1,10 +1,10 @@
 from glob import glob
-from utils import load_image
-from segmentation import rgb_to_gray, extract_blocks
+from .utils import load_image
+from .segmentation import rgb_to_gray, extract_blocks
 from pprint import pprint
-from qr_code import read_qrcode
-from ocr import extract_text
-from parser import extract_invoice_details, extract_table_details,extract_qrcode
+from .qr_code import read_qrcode
+from .ocr import extract_text
+from .parser import extract_invoice_details, extract_table_details,extract_qrcode
 import json
 
 
@@ -23,7 +23,7 @@ def save_qr(file,text_qr):
     with open(edit_filename(file,"_qr"),"w")as f:
         json.dump(text_qr,f)
 
-def process_image(file):
+def process_image(file:str):
     image = load_image(file)
     #gray = rgb_to_gray(image)
     blocks = extract_blocks(image)
@@ -37,6 +37,12 @@ def process_image(file):
     save_fact(file, text_fact)
     save_table(file,text_table)
     save_qr(file,text_qrcode)
+
+    return {
+        "fact": text_fact,
+        "table": text_table,
+        "qr_code": text_qrcode
+    }
 
     #pprint(text_qrcode)
     #pprint(text_fact)

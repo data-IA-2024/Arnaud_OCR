@@ -1,9 +1,13 @@
+
+
 document.addEventListener("DOMContentLoaded", function() {
     const uploadLink = document.getElementById("invoice-upload-link");
     const fileInput = document.createElement("input");
     const dropZone = document.getElementById("drop-zone");
+    const ocr_button = document.getElementById("OCR-button");
 
     fileInput.type = "file";
+    fileInput.id = "name"
     fileInput.accept = "image/png, image/jpeg, image/jpg, image/webp";
     fileInput.style.display = "none";
     document.body.appendChild(fileInput);
@@ -13,6 +17,10 @@ document.addEventListener("DOMContentLoaded", function() {
             e.preventDefault();
             fileInput.click();
         });
+
+    }
+    if (ocr_button){
+        ocr_button.addEventListener("click", () => send_file(),{once: true})
     }
 
     if (dropZone) {
@@ -67,10 +75,13 @@ document.addEventListener("DOMContentLoaded", function() {
         imageContainer.style.height = "300px";
         
         const img = document.createElement("img");
+        img.id = "image"
         img.style.width = "300%";
         img.style.height = "300%";
         img.style.objectFit = "contain";
-        
+        img.classList.add("border")
+        img.classList.add("border-dark")
+
     
         const reader = new FileReader();
         console.log("reader initialiséé :");
@@ -78,6 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("loading file");
             img.src = e.target.result;
             imageContainer.appendChild(img);
+
                 // Ajoutez ici la logique pour lancer le processus OCR
         };
             
@@ -94,9 +106,28 @@ unable button when image loaded
         } else {
             console.error("Element #drop-zone non trouvé lors de l'affichage de l'aperçu");
         }
-        reader.readAsDataURL(file);
+        imageData=reader.readAsDataURL(file);
+        document.getElementById("OCR-button").classList.remove("disabled");
     };
-        
+    async function send_file(){
+        let image = document.getElementById("name").files[0];
+        let form_Data = new FormData();
+        form_Data.append("file", image)
+        let picture = fetch('/OCR',{method: "POST", body: form_Data}).then(response => {
+            if (!response.ok) {
+                throw new Error('OCR extraction failed');
+            }
+            return response.json();
+        })
+        .then(result => {
+            console.log('OCR extraction successful:', result);
+            console.log('OCR Text: ' + result.filename);
+        })
+        .catch(error => {
+            console.error('Error during OCR extraction:', error);
+            console.error('OCR extraction failed: ' + error.message);
+        });;
+    }
     
     
 });
