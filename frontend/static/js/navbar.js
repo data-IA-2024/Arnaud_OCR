@@ -70,26 +70,33 @@ document.addEventListener("DOMContentLoaded", function() {
         img.style.width = "300%";
         img.style.height = "300%";
         img.style.objectFit = "contain";
+        
     
         const reader = new FileReader();
+        console.log("reader initialiséé :");
         reader.onload = function(e) {
+            console.log("loading file");
             img.src = e.target.result;
             imageContainer.appendChild(img);
-    ;
                 // Ajoutez ici la logique pour lancer le processus OCR
-            };
-            
-            container.appendChild(imageContainer);
-            container.appendChild(ocrButton);
-            
-            if (dropZone) {
-                dropZone.innerHTML = '';
-                dropZone.appendChild(container);
-            } else {
-                console.error("Element #drop-zone non trouvé lors de l'affichage de l'aperçu");
-            }
         };
-        
+            
+        container.appendChild(imageContainer);
+            //container.appendChild(ocrButton);
+            /*
+unable button when image loaded
+
+            */
+            
+        if (dropZone) {
+            dropZone.innerHTML = '';
+            dropZone.appendChild(container);
+        } else {
+            console.error("Element #drop-zone non trouvé lors de l'affichage de l'aperçu");
+        }
         reader.readAsDataURL(file);
+    };
+        
+    
     
 });
