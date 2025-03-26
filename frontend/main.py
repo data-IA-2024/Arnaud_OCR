@@ -13,6 +13,7 @@ from PIL import Image
 import io
 from fastapi.responses import RedirectResponse
 from backend.script.main import process_image
+from psswd import verify_credentials
 #from psswd import verify_password
 app = FastAPI()
 
