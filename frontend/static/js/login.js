@@ -2,27 +2,32 @@ document.addEventListener('DOMContentLoaded', function () {
   const loginForm = document.getElementById('login-form');
   const errorToast = document.getElementById('error-toast');
   const errorToastBody = document.getElementById('error-toast-body');
-  const errorToastInstance = bootstrap.Toast.getOrCreateInstance(errorToast);
+  const errorToastInstance = new bootstrap.Toast(errorToast);
 
   loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const response = await fetch('/login', {
-      method: 'POST',
-      body: new URLSearchParams(formData),
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      credentials: 'include'
-  });
-  
+      e.preventDefault();
+      const formData = new URLSearchParams(new FormData(loginForm));
+      
+      try {
+          const response = await fetch('/login', {
+              method: 'POST',
+              body: formData,
+              headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              credentials: 'include'
+          });
 
-    if (response.ok) {
-      window.location.href = '/';
-    } else {
-      const error = await response.json();
-      errorToastBody.textContent = `Erreur: ${error.detail}`;
-      errorToastInstance.show();
-    }
+          if (response.ok) {
+              window.location.href = '/';
+          } else {
+              const error = await response.json();
+              errorToastBody.textContent = `Erreur: ${error.detail}`;
+              errorToastInstance.show();
+          }
+      } catch (error) {
+          errorToastBody.textContent = "Erreur de connexion au serveur";
+          errorToastInstance.show();
+      }
   });
 });

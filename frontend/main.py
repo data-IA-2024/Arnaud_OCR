@@ -1,38 +1,71 @@
-from fastapi import FastAPI, Request, File, UploadFile, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse,JSONResponse
+from fastapi import FastAPI, Request, File, UploadFile, Depends, HTTPException, status, Form
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import os
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.middleware.cors import CORSMiddleware
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-from fastapi.middleware.cors import CORSMiddleware
-from backend.script.main import process_image
+import os
 from PIL import Image
 import io
 
-
-
 app = FastAPI()
 
+# Configuration CORS corrigée
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:800"],  # Remplacez par l'URL de votre frontend
+    allow_origins=["http://127.0.0.1:8000"],  # Port corrigé (8000 au lieu de 800)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Montage du dossier static
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Configuration JWT
+SECRET_KEY = "votre_clé_secrète_très_longue_et_aléatoire"  # À changer en production
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Définition du dossier des templates
+# Authentification en dur
+HARDCODED_USER = {
+    "username": "arnaud@gmail.com",
+    "password": "1234",  # À ne PAS faire en production
+    "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"  # Hachage de '1234'
+}
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Configuration des templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# Récupération du token depuis les cookies
+async def get_current_user(request: Request):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentification requise",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    token = request.cookies.get("access_token")
+    if not token or not token.startswith("Bearer "):
+        raise credentials_exception
+
+    try:
+        token = token.split(" ")[1]
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username != HARDCODED_USER["username"]:
+            raise credentials_exception
+        return username
+    except JWTError:
+        raise credentials_exception
+
+# Routes
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def home(request: Request, user: str = Depends(get_current_user)):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
@@ -42,14 +75,44 @@ async def login_page(request: Request):
 @app.get("/navbar", response_class=HTMLResponse)
 async def navbar_page(request: Request):
     return templates.TemplateResponse("navbar.html", {"request": request})
+
+@app.post("/login")
+async def login(username: str = Form(...), password: str = Form(...)):
+    if username != HARDCODED_USER["username"] or not pwd_context.verify(password, HARDCODED_USER["hashed_password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Identifiants incorrects"
+        )
+
+    access_token = jwt.encode(
+        {"sub": username, "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)},
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="Lax"
+    )
+    return response
+
+@app.get("/logout")
+async def logout():
+    response = RedirectResponse(url="/login")
+    response.delete_cookie("access_token")
+    return response
+
+# Routes protégées
 @app.post("/upload")
-async def upload_file(file: UploadFile):
+async def upload_file(file: UploadFile, user: str = Depends(get_current_user)):
     try:
-        # Définir un chemin pour enregistrer les fichiers
         upload_folder = "./uploads"
         os.makedirs(upload_folder, exist_ok=True)
         
-        # Enregistrer le fichier sur le serveur
         file_path = os.path.join(upload_folder, file.filename)
         with open(file_path, "wb") as f:
             f.write(await file.read())
@@ -57,91 +120,10 @@ async def upload_file(file: UploadFile):
         return {"message": f"Fichier {file.filename} uploadé avec succès."}
     except Exception as e:
         return {"error": str(e)}
-    
+
 @app.post("/OCR")
-async def OCR_page(file: UploadFile=File()):
+async def OCR_page(file: UploadFile = File(...), user: str = Depends(get_current_user)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
     image.save("temp/temp.png")
-    print(image)
-    return {'filename':file.filename, 'result' : process_image('temp/temp.png')}
-
-@app.get("/logout", response_class=HTMLResponse)
-async def logout_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
-# Constantes pour JWT
-SECRET_KEY = "votre_clé_secrète_très_longue_et_aléatoire"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# Modèles Pydantic
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class User(BaseModel):
-    username: str
-    email: str | None = None
-
-# Contexte de cryptage et schéma OAuth2
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# Fonctions d'authentification
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        user = User(username=username)
-    except JWTError:
-        raise credentials_exception
-    return user
-
-
-# Route pour l'authentification
-@app.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    if form_data.username != "arnaud@gmail.com" or form_data.password != "1234":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": form_data.username}, expires_delta=access_token_expires
-    )
-    response = JSONResponse(content={"message": "Connexion réussie"})
-    response.set_cookie(
-        key="access_token",
-        value=f"Bearer {access_token}",
-        httponly=True,
-        max_age=1800,
-        expires=1800,
-    )
-    return response
-
+    return {'filename': file.filename, 'result': process_image('temp/temp.png')}
