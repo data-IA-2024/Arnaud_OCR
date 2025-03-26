@@ -11,7 +11,9 @@ from datetime import datetime, timedelta
 import os
 from PIL import Image
 import io
-
+from fastapi.responses import RedirectResponse
+from backend.script.main import process_image
+#from psswd import verify_password
 app = FastAPI()
 
 # Configuration CORS corrigée
@@ -30,17 +32,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Authentification en dur
 HARDCODED_USER = {
-    "username": "arnaud@gmail.com",
+    "username": "arnaud",
     "password": "1234",  # À ne PAS faire en production
     "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"  # Hachage de '1234'
 }
-
+print('crypt...')
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+print('crypt Done')
 # Configuration des templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-
+print('jinja Done')
 # Récupération du token depuis les cookies
 async def get_current_user(request: Request):
     credentials_exception = HTTPException(
@@ -51,30 +53,33 @@ async def get_current_user(request: Request):
     
     token = request.cookies.get("access_token")
     if not token or not token.startswith("Bearer "):
-        raise credentials_exception
+        return None
+        #raise credentials_exception
 
     try:
         token = token.split(" ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username != HARDCODED_USER["username"]:
-            raise credentials_exception
+            #raise credentials_exception
+            return None
         return username
     except JWTError:
-        raise credentials_exception
+        #raise credentials_exception
+        return None
 
 # Routes
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, user: str = Depends(get_current_user)):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def home(request: Request, user:str = Depends(get_current_user)):
+    print(user, 14)
+    if isinstance (user, str):
+        return templates.TemplateResponse("index.html", {"request": request})
+    return RedirectResponse(url="/signin")
 
-@app.get("/login", response_class=HTMLResponse)
+@app.get("/signin", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-@app.get("/navbar", response_class=HTMLResponse)
-async def navbar_page(request: Request):
-    return templates.TemplateResponse("navbar.html", {"request": request})
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
@@ -122,7 +127,7 @@ async def upload_file(file: UploadFile, user: str = Depends(get_current_user)):
         return {"error": str(e)}
 
 @app.post("/OCR")
-async def OCR_page(file: UploadFile = File(...), user: str = Depends(get_current_user)):
+async def OCR_page(file: UploadFile = File(...), user: str = 'arno'):#Depends(get_current_user)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents))
     image.save("temp/temp.png")
