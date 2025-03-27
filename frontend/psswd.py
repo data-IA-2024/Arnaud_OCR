@@ -86,7 +86,7 @@ def verify_credentials(username, password):
 users = load_user()
 
 if __name__ == '__main__':
-    register_user('arnaud', '1234')
+    register_user('a@gmail.com', '1234')
     register_user('steve', '5678')
 
     dump_users()

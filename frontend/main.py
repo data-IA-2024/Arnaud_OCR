@@ -5,7 +5,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import os
@@ -33,12 +32,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Authentification en dur
 HARDCODED_USER = {
-    "username": "arnaud",
+    "username": "a@gmail.com",
     "password": "1234",  # À ne PAS faire en production
     "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"  # Hachage de '1234'
 }
 print('crypt...')
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 print('crypt Done')
 # Configuration des templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -84,7 +82,7 @@ async def login_page(request: Request):
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
-    if username != HARDCODED_USER["username"] or not pwd_context.verify(password, HARDCODED_USER["hashed_password"]):
+    if not verify_credentials(username, password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Identifiants incorrects"
@@ -108,7 +106,7 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
 @app.get("/logout")
 async def logout():
-    response = RedirectResponse(url="/login")
+    response = RedirectResponse(url="/signin")
     response.delete_cookie("access_token")
     return response
 
