@@ -81,9 +81,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function envoyerFichier() {
+        const inputFichier = document.getElementById('fichier-facture');
         const fichier = inputFichier.files[0];
         const formData = new FormData();
-        formData.append("fichier", fichier);
+        formData.append("file", fichier);
+        console.log(formData)
 
         try {
             const reponse = await fetch('/OCR', {
@@ -94,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!reponse.ok) {
                 throw new Error('Échec de l\'extraction OCR');
             }
-
             const resultat = await reponse.json();
             console.log('Résultat OCR:', resultat);
             afficherResultats(resultat);
@@ -104,14 +105,27 @@ document.addEventListener("DOMContentLoaded", function() {
             alert("Une erreur est survenue lors du traitement de la facture");
         }
     }
+    function capitalizeFirstLetter(val) {
+        return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+    }
+    function formatKey(key){
+        return capitalizeFirstLetter(key.replace("_", " "))
+    }
+
 
     function afficherResultats(donnees) {
-        const conteneurResultats = document.getElementById("resultats-ocr");
-        conteneurResultats.innerHTML = `
+        const conteneurResultats = document.getElementById("ocr-results");
+        conteneurResultats.innerHTML = '<h3>Informations extraites</h3>'
+        for (const [key, value] of Object.entries(donnees)){
+            conteneurResultats.innerHTML +=`<p><b>${formatKey(key)}:</b> ${value}</p>`
+        }
+        
+        /*conteneurResultats.innerHTML = `
             <h3>Informations extraites</h3>
             <p>Numéro de facture: ${donnees.numero_facture}</p>
             <p>Date: ${donnees.date}</p>
+            <p>Nom: ${donnees.nom}</p>
             <p>Montant total: ${donnees.montant} €</p>
-        `;
+        `;*/
     }
 });

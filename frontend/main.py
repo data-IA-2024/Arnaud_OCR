@@ -17,6 +17,14 @@ from sqlalchemy.orm import Session
 from database.db_connector import get_db
 from database.model_table import Customer
 from typing import Optional
+import logging
+import json
+import traceback
+
+TEMP_DIR = './temp/'
+
+nbre_factures_OK = 0
+
 #from psswd import verify_password
 app = FastAPI()
 
@@ -44,7 +52,20 @@ print('crypt...')
 print('crypt Done')
 # Configuration des templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+
+# Définition du chemin absolu vers le dossier templates
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates_path = os.path.join(BASE_DIR, "templates")
+
+print(f"Templates path: {templates_path}")
+print(f"Base.html exists: {os.path.exists(os.path.join(templates_path, 'base.html'))}")
+
+if not os.path.exists(templates_path):
+    os.makedirs(templates_path)
+    print(f"Created templates directory at {templates_path}")
+
+templates = Jinja2Templates(directory=templates_path)
+
 print('jinja Done')
 # Récupération du token depuis les cookies
 async def get_current_user(request: Request):
@@ -108,17 +129,52 @@ async def login(username: str = Form(...), password: str = Form(...)):
     )
     return response
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
 @app.get("/billing", response_class=HTMLResponse)
 async def billing_data(request: Request, user: str = Depends(get_current_user)):
-    if isinstance(user, str):
-        return templates.TemplateResponse("billing.html", {"request": request})
-    return RedirectResponse(url="/signin")
+    try:
+        # Vérification du token
+        if not user:
+            return RedirectResponse(url="/signin")
+        
+        # Vérification du template
+        if not hasattr(templates, "get_template"):
+            raise Exception("Templates not properly configured")
+            
+        # Test du rendu template minimal
+        try:
+            return templates.TemplateResponse(
+                "billing.html",
+                {
+                    "request": request,
+                    "billing_data": [],
+                    "user": user
+                }
+            )
+        except Exception as template_error:
+            print(f"Template error: {str(template_error)}")
+            return JSONResponse(
+                status_code=500,
+                content={"error": f"Template error: {str(template_error)}"}
+            )
+            
+    except Exception as e:
+        print(f"Error in billing route: {str(e)}")
+        print(traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "trace": traceback.format_exc()}
+        )
 
 @app.get("/monitoring", response_class=HTMLResponse)
-async def monitoring_data(request: Request, user: str = Depends(get_current_user)):
-    if isinstance(user, str):
-        return templates.TemplateResponse("monitoring.html", {"request": request})
-    return RedirectResponse(url="/signin")
+async def monitoring_data(request: Request):
+    #if isinstance(user, str):
+    return templates.TemplateResponse("monitoring.html", {"request": request, "log_1":nbre_factures_OK//2, "date_today":datetime.now().strftime('%d-%m-%Y')})
+#    return RedirectResponse(url="/signin")
 
 
 @app.get("/logout")
@@ -153,9 +209,6 @@ async def get_customers(name: str = None, email: str = None, db: Session = Depen
     ]
 
 
-
-
-
 # Routes protégées
 @app.post("/upload")
 async def upload_file(file: UploadFile, user: str = Depends(get_current_user)):
@@ -170,10 +223,60 @@ async def upload_file(file: UploadFile, user: str = Depends(get_current_user)):
         return {"message": f"Fichier {file.filename} uploadé avec succès."}
     except Exception as e:
         return {"error": str(e)}
+    
+    # Configuration du logging
+logging.basicConfig(
+    filename='ocr_monitoring.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 @app.post("/OCR")
-async def OCR_page(file: UploadFile = File(...), user: str = 'arno'):#Depends(get_current_user)):
-    contents = await file.read()
-    image = Image.open(io.BytesIO(contents))
-    image.save("temp/temp.png")
-    return {'filename': file.filename, 'result': process_image('temp/temp.png')}
+async def OCR_page(file: UploadFile = File(...)):
+    
+    temp_file = TEMP_DIR + '/invoice-temp.png'
+    try:
+        if not file.content_type.startswith("image/"):
+            logging.error(f"Type de fichier invalide: {file.content_type}")
+            raise HTTPException(400, "Seules les images sont acceptées")
+
+        logging.info(f"Traitement de l'image: {file.filename}")
+        
+        with open(temp_file, 'wb') as f:
+            f.write(await file.read())
+       
+        start_time = datetime.now()
+        result = process_image(temp_file)
+        #processing_time = (datetime.now() - start_time).total_seconds()
+        
+       
+    #    # Log du résultat
+    #     log_entry = {
+    #         "timestamp": datetime.now().isoformat(),
+    #         "filename": file.filename,
+    #         "processing_time": processing_time,
+    #         "success": True,
+    #         "data": {
+    #             "numero_facture": result["fact"]["no"],
+    #             "date": result["qr_code"]["date"],
+    #             "email": result["fact"]["email"],
+    #             "montant": result["table"]["total"]
+    #         }
+    #     }
+
+        global nbre_factures_OK
+        nbre_factures_OK =  nbre_factures_OK + 1
+        
+        return {
+            "numero_facture": result["fact"]["no"],
+            "date": result["qr_code"]["date"],
+            "nom": result["fact"]["name"],
+            "email": result["fact"]["email"],
+            "adresse": result["fact"]["adress"],
+            "montant": f"{result['table']['total']}€"
+        }
+
+    except Exception as e:
+        logging.error(f"Erreur de traitement: {str(e)}")
+        raise HTTPException(500, detail=f"Erreur de traitement : {str(e)}")
+    

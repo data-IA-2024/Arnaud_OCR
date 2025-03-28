@@ -6,6 +6,7 @@ from backend.script.qr_code import read_qrcode
 from backend.script.ocr import extract_text
 from backend.script.parser import extract_invoice_details, extract_table_details,extract_qrcode
 import json
+import logging
 
 
 def edit_filename(filename,prefix):
@@ -24,6 +25,7 @@ def save_qr(file,text_qr):
         json.dump(text_qr,f)
 
 def process_image(file:str):
+    logging.info("debut_process_image")
     image = load_image(file)
     #gray = rgb_to_gray(image)
     blocks = extract_blocks(image)
@@ -37,6 +39,7 @@ def process_image(file:str):
     save_fact(file, text_fact)
     save_table(file,text_table)
     save_qr(file,text_qrcode)
+    logging.info("fin_process_image")
 
     return {
         "fact": text_fact,

@@ -42,7 +42,14 @@ def main():
         except Exception as e:
             print(e)
     
+def drop_all():
+     client = SQLClient()
+     client.drop_all()
+
+
+
 
 if __name__ == "__main__":
     logging.getLogger('sqlalchemy.engine.Engine').disabled = True
     main()
+    #drop_all()
