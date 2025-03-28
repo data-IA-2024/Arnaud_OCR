@@ -1,10 +1,10 @@
 from glob import glob
-from .utils import load_image
-from .segmentation import rgb_to_gray, extract_blocks
+from backend.script.utils import load_image
+from backend.script.segmentation import rgb_to_gray, extract_blocks
 from pprint import pprint
-from .qr_code import read_qrcode
-from .ocr import extract_text
-from .parser import extract_invoice_details, extract_table_details,extract_qrcode
+from backend.script.qr_code import read_qrcode
+from backend.script.ocr import extract_text
+from backend.script.parser import extract_invoice_details, extract_table_details,extract_qrcode
 import json
 
 

@@ -1,133 +1,117 @@
-
-
 document.addEventListener("DOMContentLoaded", function() {
-    const uploadLink = document.getElementById("invoice-upload-link");
-    const fileInput = document.createElement("input");
-    const dropZone = document.getElementById("drop-zone");
-    const ocr_button = document.getElementById("OCR-button");
+    const lienUpload = document.getElementById("invoice-upload-link");
+    const inputFichier = document.createElement("input");
+    const zoneDepot = document.getElementById("drop-zone");
+    const boutonOCR = document.getElementById("OCR-button");
 
-    fileInput.type = "file";
-    fileInput.id = "name"
-    fileInput.accept = "image/png, image/jpeg, image/jpg, image/webp";
-    fileInput.style.display = "none";
-    document.body.appendChild(fileInput);
+    // Configuration de l'input fichier
+    inputFichier.type = "file";
+    inputFichier.id = "fichier-facture";
+    inputFichier.accept = "image/png, image/jpeg, image/jpg, image/webp";
+    inputFichier.style.display = "none";
+    document.body.appendChild(inputFichier);
 
-    if (uploadLink) {
-        uploadLink.addEventListener("click", function(e) {
+    // Gestionnaire pour le lien d'upload
+    if (lienUpload) {
+        lienUpload.addEventListener("click", function(e) {
             e.preventDefault();
-            fileInput.click();
+            inputFichier.click();
         });
-
-    }
-    if (ocr_button){
-        ocr_button.addEventListener("click", () => send_file(),{once: true})
     }
 
-    if (dropZone) {
-        dropZone.addEventListener("click", function() {
-            fileInput.click();
-        });
-
-        dropZone.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            dropZone.classList.add("dragover");
-        });
-
-        dropZone.addEventListener("dragleave", () => {
-            dropZone.classList.remove("dragover");
-        });
-
-        dropZone.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropZone.classList.remove("dragover");
-            handleFile(e.dataTransfer.files[0]);
-        });
-    } else {
-        console.error("Element #drop-zone non trouvé");
+    // Gestionnaire pour le bouton OCR
+    if (boutonOCR) {
+        boutonOCR.addEventListener("click", () => envoyerFichier());
     }
 
-    fileInput.addEventListener("change", function() {
+    // Gestion de la zone de dépôt
+    if (zoneDepot) {
+        zoneDepot.addEventListener("click", () => inputFichier.click());
+
+        zoneDepot.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            zoneDepot.classList.add("survol");
+        });
+
+        zoneDepot.addEventListener("dragleave", () => {
+            zoneDepot.classList.remove("survol");
+        });
+
+        zoneDepot.addEventListener("drop", (e) => {
+            e.preventDefault();
+            zoneDepot.classList.remove("survol");
+            gererFichier(e.dataTransfer.files[0]);
+        });
+    }
+
+    // Gestion du changement de fichier
+    inputFichier.addEventListener("change", function() {
         if (this.files && this.files[0]) {
-            handleFile(this.files[0]);
+            gererFichier(this.files[0]);
         }
     });
 
-    function handleFile(file) {
-        if (file) {
-            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-            if (allowedTypes.includes(file.type)) {
-                displayPreview(file);
-            } else {
-                alert("Veuillez sélectionner une image au format PNG, JPEG, JPG ou WebP.");
-            }
-        }
-    }
-
-    function displayPreview(file) {
-        console.log("Fichier sélectionné :", file.name);
-        
-        const container = document.createElement("div");
-        container.className = "d-flex align-items-start";
-        
-        const imageContainer = document.createElement("div");
-        imageContainer.className = "position-relative me-3";
-        imageContainer.style.width = "300px";
-        imageContainer.style.height = "300px";
-        
-        const img = document.createElement("img");
-        img.id = "image"
-        img.style.width = "300%";
-        img.style.height = "300%";
-        img.style.objectFit = "contain";
-        img.classList.add("border")
-        img.classList.add("border-dark")
-
-    
-        const reader = new FileReader();
-        console.log("reader initialiséé :");
-        reader.onload = function(e) {
-            console.log("loading file");
-            img.src = e.target.result;
-            imageContainer.appendChild(img);
-
-                // Ajoutez ici la logique pour lancer le processus OCR
-        };
-            
-        container.appendChild(imageContainer);
-            //container.appendChild(ocrButton);
-            /*
-unable button when image loaded
-
-            */
-            
-        if (dropZone) {
-            dropZone.innerHTML = '';
-            dropZone.appendChild(container);
+    function gererFichier(fichier) {
+        const typesAutorises = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        if (typesAutorises.includes(fichier.type)) {
+            afficherApercu(fichier);
+            boutonOCR.classList.remove("desactive");
         } else {
-            console.error("Element #drop-zone non trouvé lors de l'affichage de l'aperçu");
+            alert("Format d'image non supporté. Veuillez utiliser PNG, JPEG, JPG ou WebP.");
         }
-        imageData=reader.readAsDataURL(file);
-        document.getElementById("OCR-button").classList.remove("disabled");
-    };
-    async function send_file(){
-        let image = document.getElementById("name").files[0];
-        let form_Data = new FormData();
-        form_Data.append("file", image)
-        let picture = fetch('/OCR',{method: "POST", body: form_Data}).then(response => {
-            if (!response.ok) {
-                throw new Error('OCR extraction failed');
-            }
-            return response.json();
-        })
-        .then(result => {
-            console.log('OCR extraction successful:', result);
-            console.log('OCR Text: ' + result.filename);
-        })
-        .catch(error => {
-            console.error('Error during OCR extraction:', error);
-            console.error('OCR extraction failed: ' + error.message);
-        });;
     }
-    
-    
+
+    function afficherApercu(fichier) {
+        const conteneur = document.createElement("div");
+        conteneur.className = "apercu-facture";
+
+        const lecteur = new FileReader();
+        
+        lecteur.onload = function(e) {
+            const image = document.createElement("img");
+            image.src = e.target.result;
+            image.alt = "Aperçu de la facture";
+            conteneur.appendChild(image);
+            
+            zoneDepot.innerHTML = '';
+            zoneDepot.appendChild(conteneur);
+        };
+        
+        lecteur.readAsDataURL(fichier);
+    }
+
+    async function envoyerFichier() {
+        const fichier = inputFichier.files[0];
+        const formData = new FormData();
+        formData.append("fichier", fichier);
+
+        try {
+            const reponse = await fetch('/OCR', {
+                method: "POST",
+                body: formData
+            });
+
+            if (!reponse.ok) {
+                throw new Error('Échec de l\'extraction OCR');
+            }
+
+            const resultat = await reponse.json();
+            console.log('Résultat OCR:', resultat);
+            afficherResultats(resultat);
+
+        } catch (erreur) {
+            console.error('Erreur:', erreur);
+            alert("Une erreur est survenue lors du traitement de la facture");
+        }
+    }
+
+    function afficherResultats(donnees) {
+        const conteneurResultats = document.getElementById("resultats-ocr");
+        conteneurResultats.innerHTML = `
+            <h3>Informations extraites</h3>
+            <p>Numéro de facture: ${donnees.numero_facture}</p>
+            <p>Date: ${donnees.date}</p>
+            <p>Montant total: ${donnees.montant} €</p>
+        `;
+    }
 });

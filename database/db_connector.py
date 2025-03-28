@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
-from model_table import Base
+from database.model_table import Base
 from sqlalchemy import URL
 from contextlib import contextmanager
 import sqlalchemy
@@ -64,8 +64,18 @@ class SQLClient:
         except Exception as e:
             print(f"❌ Erreur de connexion : {e}")
 
+                # À ajouter à la fin du fichier
+client = SQLClient()  # Instance unique
+
+def get_db():
+    with client.get_session() as db:
+        yield db
+
+
 
 # Exécuter le test seulement si ce fichier est lancé directement
 if __name__ == "__main__":
     client = SQLClient()
     client.test_connection()
+
+

@@ -16,14 +16,23 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
+            <a class="nav-link text-dark" href="/">
+              <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+              <span class="visually-hidden">Home</span>
+            </a>
+          </li>
+          <li class="nav-item">
             <a id="invoice-upload-link" class="nav-link text-dark" href="#">Upload Invoice</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="#">Billing data</a>
+            <a class="nav-link text-dark" href="/customers">Customers</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-dark" href="#">Monitoring data</a>
-          </li>
+            <a class="nav-link text-dark" href="/billing">Billing data</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="/monitoring">Monitoring data</a>
+      </li>
           <li class="nav-item">
             <a class="nav-link bg-warning text-dark rounded-pill px-3 py-2 mx-2 disabled" id="OCR-button" href="#">OCR extract</a>
           </li>

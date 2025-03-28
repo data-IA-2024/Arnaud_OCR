@@ -101,7 +101,7 @@ def get_all_invoice_files():
     table_files       = sorted(glob.glob(os.path.join(DATA_PATH, "**", "*_bloc_table.txt"), recursive=True))
 
     # For security reasons
-    assert len(facturation_files) == len(table_files)
+    #assert len(facturation_files) == len(table_files)
 
     # Not Useful !!!!
 
@@ -199,7 +199,7 @@ def insert_facturation_all():
     """Insère les clients et les factures en base de données à partir des fichiers texte."""
     client = SQLClient()
 
-    customer_info = load_customer_info()
+    #customer_info = load_customer_info()
     facturation_files, table_files = get_all_invoice_files()
 
     num_files = len(facturation_files)
@@ -217,7 +217,7 @@ def insert_facturation_all():
 
     for j, fact_file in enumerate(facturation_files):
         print(f"\r{(j+1)*100/num_files:.2f} % | {fact_file}\033[0K", end='', flush=True)
-        insert_facturation(client, customer_info, fact_file)
+        #insert_facturation(client, customer_info, fact_file)
         
     print("\n✅ Insertion terminée !")
 

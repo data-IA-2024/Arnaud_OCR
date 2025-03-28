@@ -13,6 +13,10 @@ import io
 from fastapi.responses import RedirectResponse
 from backend.script.main import process_image
 from psswd import verify_credentials
+from sqlalchemy.orm import Session
+from database.db_connector import get_db
+from database.model_table import Customer
+from typing import Optional
 #from psswd import verify_password
 app = FastAPI()
 
@@ -69,11 +73,11 @@ async def get_current_user(request: Request):
 
 # Routes
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, user:str = Depends(get_current_user)):
-    print(user, 14)
-    if isinstance (user, str):
-        return templates.TemplateResponse("index.html", {"request": request})
-    return RedirectResponse(url="/signin")
+async def home(request: Request):
+    #print(user, 14)
+    #if isinstance (user, str):
+    return templates.TemplateResponse("index.html", {"request": request})
+    #return RedirectResponse(url="/signin")
 
 @app.get("/signin", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -104,11 +108,53 @@ async def login(username: str = Form(...), password: str = Form(...)):
     )
     return response
 
+@app.get("/billing", response_class=HTMLResponse)
+async def billing_data(request: Request, user: str = Depends(get_current_user)):
+    if isinstance(user, str):
+        return templates.TemplateResponse("billing.html", {"request": request})
+    return RedirectResponse(url="/signin")
+
+@app.get("/monitoring", response_class=HTMLResponse)
+async def monitoring_data(request: Request, user: str = Depends(get_current_user)):
+    if isinstance(user, str):
+        return templates.TemplateResponse("monitoring.html", {"request": request})
+    return RedirectResponse(url="/signin")
+
+
 @app.get("/logout")
 async def logout():
     response = RedirectResponse(url="/signin")
     response.delete_cookie("access_token")
     return response
+
+@app.get("/customers", response_class=HTMLResponse)
+async def customers_page(request: Request, user: str = Depends(get_current_user)):
+    if isinstance(user, str):
+        return templates.TemplateResponse("customers.html", {"request": request})
+    return RedirectResponse(url="/signin")
+
+@app.get("/api/customers")
+async def get_customers(name: str = None, email: str = None, db: Session = Depends(get_db)):
+    query = db.query(Customer)
+    if name:
+        query = query.filter(Customer.name.ilike(f"%{name}%"))
+    if email:
+        query = query.filter(Customer.email.ilike(f"%{email}%"))
+    customers = query.all()
+    return [
+        {
+            "email": customer.email,
+            "name": customer.name,
+            "gender": customer.gender,
+            "adress": customer.adress,
+            "birth": customer.birth.isoformat() if customer.birth else None
+        }
+        for customer in customers
+    ]
+
+
+
+
 
 # Routes protégées
 @app.post("/upload")

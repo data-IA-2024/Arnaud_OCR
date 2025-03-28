@@ -1,7 +1,7 @@
 import pytesseract
 import os
 from dotenv import load_dotenv
-from .utils import load_image
+from backend.script.utils import load_image
 import re
 from glob import glob
 
