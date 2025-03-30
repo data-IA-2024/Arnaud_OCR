@@ -139,7 +139,7 @@ async def billing_data(request: Request, user: str = Depends(get_current_user)):
     try:
         # Vérification du token
         if not user:
-            return RedirectResponse(url="/signin")
+            return RedirectResponse(url="/monitoring")
         
         # Vérification du template
         if not hasattr(templates, "get_template"):
