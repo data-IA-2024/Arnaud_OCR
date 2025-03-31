@@ -53,6 +53,12 @@ data/*
 *.json  # Résultats OCR si exportés en JSON
 *.csv   # Résultats OCR si exportés en CSV
 
+# Ignore all PDFs
+*.pdf
+
+# Allow PDFs in docs folder
+!docs/*.pdf
+
 # Modèles Machine Learning (OCR, Deep Learning)
 *.h5
 *.pkl
