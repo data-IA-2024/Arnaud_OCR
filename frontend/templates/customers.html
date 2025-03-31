@@ -1,0 +1,36 @@
+{% include 'navbar.html' %}
+
+<div class="container mt-4">
+    <h1>Liste des Clients</h1>
+    
+    <div class="mb-3">
+        <select id="searchType" class="form-select mb-2">
+            <option value="name">Rechercher par nom</option>
+            <option value="email">Rechercher par email</option>
+        </select>
+        
+        <input type="text" 
+               id="searchInput" 
+               class="form-control" 
+               placeholder="Entrez votre recherche">
+    </div>
+    
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Nom</th>
+                <th>Genre</th>
+                <th>Adresse</th>
+                <th>Date de naissance</th>
+            </tr>
+        </thead>
+        <tbody id="customers-table">
+            <!-- Le contenu sera injecté ici par JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+
+<script src="/static/js/customers.js"></script>
